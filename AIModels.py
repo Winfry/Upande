@@ -117,3 +117,76 @@ joblib.dump(scaler, 'wash_scaler.pkl')
 # Load model for later use
 # model = joblib.load('wash_anomaly_model.pkl')
 # scaler = joblib.load('wash_scaler.pkl')
+
+
+# Temperature Prediction
+class TemperaturePrediction:
+    def __init__(self):
+        """
+        2. Temperature Prediction
+        2.1 Purpose
+        The Temperature Prediction model provides insights into temperature variations over time, which is crucial for monitoring environmental conditions at WASH sites.
+        
+        2.2 Model Used
+        A placeholder model was implemented using random temperature variations. This can be replaced with a time-series forecasting model such as ARIMA or LSTMs for better accuracy.
+        
+        2.3 Data
+        A dataset with 100 days of temperature values was generated. This data helps in detecting trends and understanding seasonal variations affecting water quality.
+        """
+        self.data = pd.DataFrame({
+            'timestamp': pd.date_range(start='2024-01-01', periods=100, freq='D'),
+            'temperature': np.random.normal(25, 5, 100)
+        })
+        
+        # Placeholder ARIMA Model
+        self.model = ARIMA(self.data['temperature'], order=(1,1,1))
+        self.model_fitted = self.model.fit()
+    
+    def predict_temperature(self, steps=24):
+        """Generates future temperature predictions for the given steps."""
+        forecast = self.model_fitted.forecast(steps=steps)
+        return forecast
+
+
+
+# Payment-Based Meter Control
+class PaymentMeterControl:
+    def __init__(self):
+        """
+        Optimizes smart meter reporting frequency based on user payment behavior.
+        Uses a Logistic Regression model to classify whether to increase reporting frequency.
+        """
+        self.data = pd.DataFrame({
+            'customer_id': np.arange(1, 101),
+            'amount_paid': np.random.uniform(100, 10000, 100),
+            'increase_frequency': np.random.choice([0, 1], size=100)
+        })
+        
+        # Feature Scaling and Model Training
+        self.model = LogisticRegression()
+        self.scaler = StandardScaler()
+        X = self.data[['amount_paid']]
+        y = self.data['increase_frequency']
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train_scaled = self.scaler.fit_transform(X_train)
+        self.model.fit(X_train_scaled, y_train)
+    
+    def predict(self, amount):
+        """Predicts whether meter reporting frequency should increase based on payment."""
+        scaled_amount = self.scaler.transform(np.array([[amount]]))
+        return self.model.predict(scaled_amount)[0]
+
+# Example Usage
+if __name__ == "__main__":
+    wash_model = WashAnomalyDetection()
+    temp_model = TemperaturePrediction()
+    payment_model = PaymentMeterControl()
+    
+    # Example payment prediction
+    example_payment = 5000
+    prediction = payment_model.predict(example_payment)
+    print(f'Predicted meter frequency change: {prediction}')
+    
+    # Example temperature forecast
+    temp_forecast = temp_model.predict_temperature(steps=10)
+    print(f'Temperature forecast: {temp_forecast}')
